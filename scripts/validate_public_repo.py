@@ -196,7 +196,7 @@ def main() -> None:
                 errors.append(f"fresh clone is missing {rel}")
                 continue
             local_bytes = local.read_bytes()
-            url = _raw_url(args.repo_url, args.branch, rel)
+            url = _raw_url(args.repo_url, commit, rel)
             try:
                 raw_bytes = _download(url)
             except (urllib.error.URLError, TimeoutError) as exc:
