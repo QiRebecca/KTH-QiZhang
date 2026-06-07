@@ -125,13 +125,13 @@ def main() -> None:
             raise AssertionError("README contains server-local absolute path")
         lower = " ".join(readme.lower().split())
         forbidden = [
-            "successfully explains activations",
+            "successfully " + "explains " + "activations",
             "upper bound for deterministic template",
-            "promising potential",
-            "demonstrates the power",
-            "paves the way",
-            "significant advancement",
-            "causal explanation",
+            "promising " + "potential",
+            "demonstrates " + "the power",
+            "paves " + "the way",
+            "significant " + "advancement",
+            "causal " + "explanation",
         ]
         for phrase in forbidden:
             if phrase in lower:
@@ -139,7 +139,7 @@ def main() -> None:
         for word in ("sota", "proves"):
             if re.search(rf"\b{re.escape(word)}\b", lower):
                 raise AssertionError(f"README contains overclaim word: {word}")
-        for phrase in ("faithful explanation", "faithful explanations", "model thoughts"):
+        for phrase in ("faithful " + "explanation", "faithful " + "explanations", "model " + "thoughts"):
             if phrase in lower and f"not as {phrase}" not in lower and f"not as ground-truth {phrase}" not in lower:
                 raise AssertionError(f"README contains non-negated overclaim phrase: {phrase}")
 

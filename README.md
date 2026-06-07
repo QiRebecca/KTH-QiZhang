@@ -1,6 +1,6 @@
 # Natural-language autoencoding of Qwen2.5-Coder activations
 
-I reimplemented a small Natural Language Autoencoder (NLA) for residual-stream activations in `Qwen/Qwen2.5-Coder-1.5B-Instruct`. The target is layer 18 of 28 on Python function code. The final AV evaluation is activation-only: the verbalizer receives a fixed prompt plus an injected activation vector, with no source code, token text, function name, docstring, summary, local context, prefix, suffix, token role, or labels. The main result is mixed. AV-RerankSFT improves directional reconstruction over AV-SFT, no-injection, shuffled-text, role-preserving shuffled-text, and deterministic template controls, but FVE<sub>raw</sub> remains near zero and FVE<sub>dir</sub> remains negative. I interpret the generated text as weak reconstruction evidence: it carries measurable activation-specific directional information, but it is not a high-fidelity reconstruction channel. On code tokens, broad semantic/syntactic roles are more recoverable than exact literals, local control flow, tokenization detail, or activation magnitude.
+I reimplemented a small Natural Language Autoencoder (NLA) for residual-stream activations in `Qwen/Qwen2.5-Coder-1.5B-Instruct`. The target is layer 18 of 28 on Python function code. The final AV evaluation is activation-only: the verbalizer receives a fixed prompt plus an injected activation vector, with no source code, token text, function name, docstring, summary, local context, prefix, suffix, token role, or labels. The result is a weak positive relative to controls, but negative in absolute FVE terms. AV-RerankSFT improves directional reconstruction over AV-SFT, no-injection, shuffled-text, role-preserving shuffled-text, and deterministic template controls, but FVE<sub>raw</sub> remains near zero and FVE<sub>dir</sub> remains negative. I interpret the generated text as weak reconstruction evidence: it carries measurable activation-specific directional information, but it is not a high-fidelity reconstruction channel. On code tokens, broad semantic/syntactic roles are more recoverable than exact literals, local control flow, tokenization detail, or activation magnitude.
 
 ## Research Question
 
@@ -37,6 +37,10 @@ flowchart LR
 ```
 
 In the diagram, "Residual activation h" is the extracted vector `h`, and "Reconstructed activation h-hat" is the AR prediction `h_hat`.
+
+![NLA-CodeScope architecture](figures/architecture.png)
+
+The final AV path is activation-only: no code or token context is given to the verbalizer at evaluation time.
 
 Layer convention is fixed in [`artifacts/nla_meta_main.yaml`](artifacts/nla_meta_main.yaml): `target_layer_label = 18` for reporting, `target_block_index_zero_based = 17`, and HuggingFace extraction uses `hidden_states[18]` because `hidden_states[0]` is the embedding output. The model width is d<sub>model</sub> = 1536.
 
@@ -145,6 +149,10 @@ The deterministic template/bootstrap row is a context-derived pseudo-text contro
 
 AV-RerankSFT has the best directional reconstruction among tested AV variants. Its 95% bootstrap CIs over function id are: FVE<sub>raw</sub> in [-0.00135, 0.00169], FVE<sub>dir</sub> in [-0.12785, -0.12065], cosine in [0.64523, 0.65015], and MSE<sub>nrm</sub> in [0.69971, 0.70955]. The main bar chart is [`figures/main_fve_bar.png`](figures/main_fve_bar.png): it shows the directional improvement over controls while all directional FVE values remain negative.
 
+![Directional FVE by method](figures/main_fve_bar.png)
+
+Directional FVE remains negative for every method, but AV-RerankSFT improves over no-injection, shuffled, role-preserving shuffled, and template controls.
+
 Paired bootstrap deltas in [`artifacts/paired_delta_ci_all_baselines.json`](artifacts/paired_delta_ci_all_baselines.json) use function id as the resampling unit:
 
 | paired comparison | Delta FVE<sub>dir</sub> | 95% CI |
@@ -168,6 +176,10 @@ An injection perturbation diagnostic on 1,000 held-out activations checks whethe
 
 Correct activation is clearly better than the perturbations, so the AV is using activation-specific information. The reconstruction distribution in [`figures/reconstruction_distribution.png`](figures/reconstruction_distribution.png) shows that this is not uniform across examples; many reconstructions remain weak.
 
+![Reconstruction cosine distribution](figures/reconstruction_distribution.png)
+
+The cosine distribution shifts slightly right after RerankSFT, but many examples remain weak, consistent with a lossy bottleneck.
+
 ## Token-role Analysis
 
 | role | n | FVE<sub>raw</sub> | FVE<sub>dir</sub> | cosine |
@@ -179,7 +191,9 @@ Correct activation is clearly better than the perturbations, so the AV is using 
 | keyword | 52 | -0.0036 | -0.0460 | 0.5191 |
 | comment/docstring | 9 | 0.2706 | -0.2000 | 0.5792 |
 
-The pattern in [`figures/token_role_breakdown.png`](figures/token_role_breakdown.png) suggests that identifiers and operators are directionally reconstructed better than literals and return/branch/control-flow tokens. The comment/docstring group is too small to interpret. The code-domain lesson is narrow: natural language preserves broad semantic or syntactic role better than exact symbolic detail.
+![Token-role breakdown](figures/token_role_breakdown.png)
+
+The pattern in [`figures/token_role_breakdown.png`](figures/token_role_breakdown.png) suggests that identifiers and operators are directionally reconstructed better than literals and return/branch/control-flow tokens. The comment/docstring group is too small to interpret. The code-domain failure mode is precision loss: natural language preserves broad semantic or syntactic token role better than exact symbolic details such as literals, local control-flow position, tokenization-level information, and magnitude. This matters for AI-for-Code because correctness often depends on precisely these details.
 
 ## Qualitative Examples
 

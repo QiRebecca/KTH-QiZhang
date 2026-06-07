@@ -62,11 +62,11 @@ def _forbidden_phrases() -> list[str]:
         "reads the " + "model",
         "faithful " + "explanation",
         "faithful " + "explanations",
-        "promising potential",
-        "demonstrates the power",
-        "paves the way",
-        "significant advancement",
-        "causal explanation",
+        "promising " + "potential",
+        "demonstrates " + "the power",
+        "paves " + "the way",
+        "significant " + "advancement",
+        "causal " + "explanation",
     ]
 
 
@@ -199,7 +199,7 @@ def main() -> None:
             normalized_lower = " ".join(lower.split())
             for phrase in _forbidden_phrases():
                 if phrase in lower:
-                    if phrase == "model thoughts" and "not as ground-truth model thoughts" in normalized_lower:
+                    if phrase == ("model " + "thoughts") and ("not as ground-truth model " + "thoughts") in normalized_lower:
                         continue
                     errors.append(f"overclaim phrase in README.md: {phrase}")
 

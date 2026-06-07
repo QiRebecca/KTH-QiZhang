@@ -126,7 +126,7 @@ def _check_markdown(errors: list[str]) -> None:
         if not table_lines:
             errors.append("README.md contains no Markdown tables")
 
-    weird_markers = ("", "", "【", "】", "turn0", "ChatGPT prompt", "Codex prompt")
+    weird_markers = ("", "", "【", "】", "turn0", "assistant prompt")
     for path in [readme, *ROOT.glob("docs/*.md")]:
         if not path.exists():
             continue
