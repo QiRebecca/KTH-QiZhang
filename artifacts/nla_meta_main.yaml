@@ -1,0 +1,31 @@
+target_model: Qwen/Qwen2.5-Coder-1.5B-Instruct
+target_layer_label: 18
+target_block_index_zero_based: 17
+hidden_states_index: 18
+d_model: 1536
+activation_type: residual_stream_hidden_state
+injection_token: <ACT>
+injection_scale: 0.01450074525668537
+av_prompt_template: 'You are describing one residual-stream activation from a code
+  language model.
+
+  The activation vector is inserted inside <act> tags.
+
+  Write a concise natural-language explanation of the code-relevant information.
+
+
+  <act><ACT></act>
+
+  Explanation:
+
+  '
+ar_architecture: truncate_to_layers=19; value_head=Linear(d,d,bias=False)
+primary_metric: FVE_raw
+secondary_metrics:
+- FVE_dir
+- cosine
+- MSE_nrm
+split_policy: by_function_id_and_code_hash
+seed: 17
+injection_scale_selection: median token embedding norm / median activation norm; A100
+  LoRA SFT path

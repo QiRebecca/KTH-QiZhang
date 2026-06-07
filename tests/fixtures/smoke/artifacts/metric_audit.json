@@ -1,0 +1,41 @@
+{
+  "checks": {
+    "global_mse_nrm_equals_2_one_minus_cosine": true,
+    "mse_nrm_equals_2_one_minus_cosine_by_role": {
+      "function_name_or_identifier": true,
+      "operator_or_punctuation": true,
+      "return_raise_yield_branch": true
+    },
+    "role_metric_n_sum_equals_test_n": true
+  },
+  "d_model": 64,
+  "limitations": [
+    "roundtrip_predictions.npz is missing, so raw SSE, directional SSE, and exact FVE recomputation cannot be audited for this run. Regenerate from scripts/09_eval_roundtrip.py after the code update to enable full CPU-only auditing."
+  ],
+  "n_test": 5,
+  "n_train": 20,
+  "reported_global_method": "AV-RerankSFT -> AR_eval",
+  "reported_global_metrics": {
+    "FVE_dir": -0.5602302178849052,
+    "FVE_raw": -0.32550024952599865,
+    "MSE_nrm": 1.5109890363706768,
+    "cosine": 0.2445054818146617
+  },
+  "role_counts_from_metrics": {
+    "function_name_or_identifier": 1,
+    "operator_or_punctuation": 3,
+    "return_raise_yield_branch": 1
+  },
+  "role_counts_from_rows": {
+    "function_name_or_identifier": 1,
+    "operator_or_punctuation": 3,
+    "return_raise_yield_branch": 1
+  },
+  "status": "partial",
+  "weighted_role_metrics_by_n": {
+    "FVE_dir": -0.559205045441009,
+    "FVE_raw": -0.32528654350139025,
+    "MSE_nrm": 1.5109890363706766,
+    "cosine": 0.2445054818146617
+  }
+}

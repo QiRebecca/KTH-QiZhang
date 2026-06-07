@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nla-codescope"
+version = "0.1.0"
+description = "Small-scale Natural Language Autoencoder reimplementation for code-model activations"
+readme = "README.md"
+requires-python = ">=3.10,<3.12"
+dependencies = [
+  "torch",
+  "transformers",
+  "datasets",
+  "accelerate",
+  "peft",
+  "safetensors",
+  "numpy",
+  "pandas",
+  "pyarrow",
+  "scikit-learn",
+  "matplotlib",
+  "pyyaml",
+  "tqdm",
+  "pytest",
+  "sentencepiece",
+]
+
+[project.optional-dependencies]
+cuda = ["bitsandbytes"]
+trl = ["trl"]
+
+[tool.setuptools.packages.find]
+include = ["nla_codescope*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

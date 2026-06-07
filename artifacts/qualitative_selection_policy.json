@@ -1,0 +1,12 @@
+{
+  "n_examples": 5,
+  "not_random_performance_estimate": true,
+  "policy": [
+    "identifier_success: highest cosine among function_name_or_identifier samples",
+    "operator_partial: operator_or_punctuation sample closest to median cosine",
+    "literal_failure: highest MSE_nrm among literal_string_or_number samples",
+    "generic_failure: lowest cosine with generated text length at least 120 characters",
+    "seeded_random_check: deterministic random sample from sorted test activation ids"
+  ],
+  "seed": 17
+}

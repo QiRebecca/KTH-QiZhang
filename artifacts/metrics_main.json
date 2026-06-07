@@ -1,0 +1,72 @@
+{
+  "ci_95": {
+    "FVE_dir": [
+      -0.12784743779529928,
+      -0.12064869902815514
+    ],
+    "FVE_raw": [
+      -0.0013455643885363412,
+      0.0016851286179897032
+    ],
+    "MSE_nrm": [
+      0.6997071097956055,
+      0.7095473148792385
+    ],
+    "cosine": [
+      0.6452263425603807,
+      0.6501464451021973
+    ]
+  },
+  "ci_method": "AV-RerankSFT -> AR_eval",
+  "methods": {
+    "AV-RerankSFT -> AR_eval": {
+      "FVE_dir": -0.1242570747849654,
+      "FVE_raw": -0.0003625626446730479,
+      "MSE_nrm": 0.7046476330145404,
+      "cosine": 0.6476761834927298
+    },
+    "AV-SFT -> AR_eval": {
+      "FVE_dir": -0.15901184099246146,
+      "FVE_raw": 0.00637982217239863,
+      "MSE_nrm": 0.7264307859013212,
+      "cosine": 0.6367846070493395
+    },
+    "Deterministic template/bootstrap text -> AR_eval": {
+      "FVE_dir": -0.18521289579629907,
+      "FVE_raw": 0.003634207460138761,
+      "MSE_nrm": 0.7428527517168709,
+      "cosine": 0.6285736241415646
+    },
+    "Mean predictor": {
+      "FVE_dir": -0.5101820819332428,
+      "FVE_raw": 1.9822020691506737e-09,
+      "MSE_nrm": 0.9465328289428532,
+      "cosine": 0.5267335855285735
+    },
+    "No-injection AV": {
+      "FVE_dir": -0.38724614891081877,
+      "FVE_raw": -0.0061048989360650285,
+      "MSE_nrm": 0.8694805993776055,
+      "cosine": 0.5652597003111973
+    },
+    "Role-preserving shuffled AV text": {
+      "FVE_dir": -0.23104537144095283,
+      "FVE_raw": -0.003183450404710575,
+      "MSE_nrm": 0.7715790512461655,
+      "cosine": 0.6142104743769172
+    },
+    "Shuffled AV text": {
+      "FVE_dir": -0.348284373183539,
+      "FVE_raw": -0.005689934642476802,
+      "MSE_nrm": 0.8450606302619811,
+      "cosine": 0.5774696848690095
+    }
+  },
+  "notes": {
+    "mean_predictor_shape": [
+      4000,
+      1536
+    ],
+    "template_baseline": "context-only and bootstrap texts are identical deterministic templates"
+  }
+}

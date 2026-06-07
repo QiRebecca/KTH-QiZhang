@@ -1,0 +1,17 @@
+{
+  "pending_gpu_tasks": [],
+  "completed_gpu_tasks": [
+    {
+      "script": "scripts/09_eval_roundtrip.py",
+      "result": "Generated artifacts/roundtrip_predictions.npz and refreshed roundtrip outputs for full SSE-level metric auditing."
+    },
+    {
+      "script": "scripts/10_eval_baselines.py",
+      "result": "Updated artifacts/metrics_main.json with merged deterministic template/bootstrap baseline and role-preserving shuffled AV text."
+    },
+    {
+      "script": "scripts/eval_injection_perturbations.py",
+      "result": "Generated artifacts/metrics_injection_perturbations.json for 1000 held-out activations."
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+name: nla-codescope
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - numpy
+  - pandas
+  - pyarrow
+  - scikit-learn
+  - matplotlib
+  - pyyaml
+  - tqdm
+  - pytest
+  - pytorch
+  - pip:
+      - transformers
+      - datasets
+      - accelerate
+      - peft
+      - safetensors
+      - sentencepiece
+      - bitsandbytes

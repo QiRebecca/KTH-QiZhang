@@ -1,0 +1,266 @@
+{
+  "activation_counts": {
+    "test": 4000,
+    "train": 32000,
+    "val": 4000
+  },
+  "ar_eval_independent": true,
+  "ar_lora": {
+    "lora_alpha": 32,
+    "lora_dropout": 0.05,
+    "lora_r": 16
+  },
+  "ar_train_used_for_rerank_only": true,
+  "artifact_hashes": {
+    "activations.jsonl": {
+      "bytes": 51618550,
+      "sha256": "7e753f94c362aecfd82dd63b6771cceedff5b3f615402ea3e0e8423ccb02a833"
+    },
+    "activations.npz": {
+      "bytes": 94823819,
+      "sha256": "6826d37c5b6e4939b7b04eb92fa4fc3adcb06e3efc11a78c2e7b2d612ac68078"
+    },
+    "av_rerank_best.jsonl": {
+      "bytes": 14272718,
+      "sha256": "7d3c883710be7f3dcb68707a2a40e898860945aa28b13d8d6cb38553a2e9491f"
+    },
+    "av_sft_outputs.jsonl": {
+      "bytes": 17180693,
+      "sha256": "ca031438949c10a1e53ccacc1ac9fc682887bffba949ca19011b0a08f74f41d3"
+    },
+    "bootstrap_texts.jsonl": {
+      "bytes": 18587298,
+      "sha256": "4fb28e0842281a17f028554d076faf239902236c6b265612fbf1f42e5959c353"
+    },
+    "metric_audit.json": {
+      "bytes": 7130,
+      "sha256": "5403c378eec4f0e9bc69186e2b2ae201d338b49bb185a4d343e5e63a11bb6fa7"
+    },
+    "metrics_by_token_role.json": {
+      "bytes": 1130,
+      "sha256": "97b8d6a55064b47edd1e91fc23d53ee04eeb86589dc38cdb7c374c8c5d40a1ac"
+    },
+    "metrics_injection_perturbations.json": {
+      "bytes": 1047,
+      "sha256": "2213e3193553d4c116c60a61efe485a294c479eaad08101b4beedb5d0b2ca8b7"
+    },
+    "metrics_main.json": {
+      "bytes": 1903,
+      "sha256": "e2e5947a88fe8ee7d27f5f7a7f0088d1cda54582c44514d905f59d503796718e"
+    },
+    "nla_meta_main.yaml": {
+      "bytes": 829,
+      "sha256": "3ef1b82297a557221abd13dd04735c45378e1b60c03f487e66a828296d61adc1"
+    },
+    "paired_delta_ci.json": {
+      "bytes": 5618,
+      "sha256": "300071d12b5f7fa67255394e7a9766323ea507a6a9cc5f8c3c484d5182c8873f"
+    },
+    "paired_delta_ci_all_baselines.json": {
+      "bytes": 5618,
+      "sha256": "300071d12b5f7fa67255394e7a9766323ea507a6a9cc5f8c3c484d5182c8873f"
+    },
+    "per_sample_metrics_injection_perturbations.npz": {
+      "bytes": 144998,
+      "sha256": "01cda3381358255505b9c83a95247972a6d95b2ccf3d0e731ec5d96c741a582a"
+    },
+    "per_sample_metrics_main.npz": {
+      "bytes": 875304,
+      "sha256": "349c04bf52a583155f95cf608044958a3877bd9b90c40528ad70cd69bfaa7c90"
+    },
+    "qualitative_examples.jsonl": {
+      "bytes": 6660,
+      "sha256": "8aec54100067f48903b0b734ce144cf3cbcd2423f401f183854fdc93bfb5fb03"
+    },
+    "qualitative_examples_curated.jsonl": {
+      "bytes": 5040,
+      "sha256": "379ffcec23baf67b43a9b45fb83e3a3301ad4c5106645cae4042e504d8d361d9"
+    },
+    "qualitative_selection_policy.json": {
+      "bytes": 517,
+      "sha256": "93ca2d87040efe015d529024be1c98a3068986b33287a02290539903a6612cf3"
+    },
+    "role_fve_raw_denominator_breakdown.json": {
+      "bytes": 4010,
+      "sha256": "04afef7f49e25ab0850cf4a98f8671ac39a271336d80a5743411e4c145e62e2f"
+    },
+    "roundtrip_outputs.jsonl": {
+      "bytes": 3874784,
+      "sha256": "a858d1bd6ebb5f26e8a724f29b1955b6b1f1016f6cdfcb743d2ce90cdda690e0"
+    },
+    "roundtrip_predictions.npz": {
+      "bytes": 34752600,
+      "sha256": "9fb696330e201cd0162d9df800c6e9deee39e7ec6d3bc8f4bcde8351a3e2ad59"
+    }
+  },
+  "artifacts": {
+    "activations.jsonl": {
+      "bytes": 51618550,
+      "sha256": "7e753f94c362aecfd82dd63b6771cceedff5b3f615402ea3e0e8423ccb02a833"
+    },
+    "activations.npz": {
+      "bytes": 94823819,
+      "sha256": "6826d37c5b6e4939b7b04eb92fa4fc3adcb06e3efc11a78c2e7b2d612ac68078"
+    },
+    "av_rerank_best.jsonl": {
+      "bytes": 14272718,
+      "sha256": "7d3c883710be7f3dcb68707a2a40e898860945aa28b13d8d6cb38553a2e9491f"
+    },
+    "av_sft_outputs.jsonl": {
+      "bytes": 17180693,
+      "sha256": "ca031438949c10a1e53ccacc1ac9fc682887bffba949ca19011b0a08f74f41d3"
+    },
+    "bootstrap_texts.jsonl": {
+      "bytes": 18587298,
+      "sha256": "4fb28e0842281a17f028554d076faf239902236c6b265612fbf1f42e5959c353"
+    },
+    "metric_audit.json": {
+      "bytes": 7130,
+      "sha256": "5403c378eec4f0e9bc69186e2b2ae201d338b49bb185a4d343e5e63a11bb6fa7"
+    },
+    "metrics_by_token_role.json": {
+      "bytes": 1130,
+      "sha256": "97b8d6a55064b47edd1e91fc23d53ee04eeb86589dc38cdb7c374c8c5d40a1ac"
+    },
+    "metrics_injection_perturbations.json": {
+      "bytes": 1047,
+      "sha256": "2213e3193553d4c116c60a61efe485a294c479eaad08101b4beedb5d0b2ca8b7"
+    },
+    "metrics_main.json": {
+      "bytes": 1903,
+      "sha256": "e2e5947a88fe8ee7d27f5f7a7f0088d1cda54582c44514d905f59d503796718e"
+    },
+    "nla_meta_main.yaml": {
+      "bytes": 829,
+      "sha256": "3ef1b82297a557221abd13dd04735c45378e1b60c03f487e66a828296d61adc1"
+    },
+    "paired_delta_ci.json": {
+      "bytes": 5618,
+      "sha256": "300071d12b5f7fa67255394e7a9766323ea507a6a9cc5f8c3c484d5182c8873f"
+    },
+    "paired_delta_ci_all_baselines.json": {
+      "bytes": 5618,
+      "sha256": "300071d12b5f7fa67255394e7a9766323ea507a6a9cc5f8c3c484d5182c8873f"
+    },
+    "per_sample_metrics_injection_perturbations.npz": {
+      "bytes": 144998,
+      "sha256": "01cda3381358255505b9c83a95247972a6d95b2ccf3d0e731ec5d96c741a582a"
+    },
+    "per_sample_metrics_main.npz": {
+      "bytes": 875304,
+      "sha256": "349c04bf52a583155f95cf608044958a3877bd9b90c40528ad70cd69bfaa7c90"
+    },
+    "qualitative_examples.jsonl": {
+      "bytes": 6660,
+      "sha256": "8aec54100067f48903b0b734ce144cf3cbcd2423f401f183854fdc93bfb5fb03"
+    },
+    "qualitative_examples_curated.jsonl": {
+      "bytes": 5040,
+      "sha256": "379ffcec23baf67b43a9b45fb83e3a3301ad4c5106645cae4042e504d8d361d9"
+    },
+    "qualitative_selection_policy.json": {
+      "bytes": 517,
+      "sha256": "93ca2d87040efe015d529024be1c98a3068986b33287a02290539903a6612cf3"
+    },
+    "role_fve_raw_denominator_breakdown.json": {
+      "bytes": 4010,
+      "sha256": "04afef7f49e25ab0850cf4a98f8671ac39a271336d80a5743411e4c145e62e2f"
+    },
+    "roundtrip_outputs.jsonl": {
+      "bytes": 3874784,
+      "sha256": "a858d1bd6ebb5f26e8a724f29b1955b6b1f1016f6cdfcb743d2ce90cdda690e0"
+    },
+    "roundtrip_predictions.npz": {
+      "bytes": 34752600,
+      "sha256": "9fb696330e201cd0162d9df800c6e9deee39e7ec6d3bc8f4bcde8351a3e2ad59"
+    }
+  },
+  "av_lora": {
+    "lora_alpha": 32,
+    "lora_dropout": 0.05,
+    "lora_r": 16
+  },
+  "commands": [
+    "bash scripts/run_main_pipeline.sh",
+    "python scripts/audit_metrics.py --config configs/main_qwen25coder_1p5b_L18.yaml",
+    "python scripts/reproduce_figures.py --config configs/main_qwen25coder_1p5b_L18.yaml"
+  ],
+  "commands_to_reproduce_figures": [
+    "python scripts/reproduce_figures.py --artifacts artifacts --figures figures"
+  ],
+  "commands_to_reproduce_metrics": [
+    "python scripts/audit_metrics.py --artifacts artifacts --require-complete",
+    "python scripts/reproduce_metrics_from_artifacts.py --artifacts artifacts",
+    "python scripts/bootstrap_delta_ci.py --config configs/main_qwen25coder_1p5b_L18.yaml"
+  ],
+  "d_model": 1536,
+  "dataset": "CodeSearchNet Python or compatible",
+  "dataset_config": {
+    "activations_per_function": 4,
+    "deduplicate_by_code_hash": true,
+    "hf_dataset_config": "python",
+    "hf_dataset_name": "code_search_net",
+    "max_tokens": 384,
+    "min_tokens": 64
+  },
+  "final_av_eval_activation_only": true,
+  "gpu_runtime_summary": "One NVIDIA A100-PCIE-40GB; observed full run about 8h12m.",
+  "hardware": "NVIDIA A100-PCIE-40GB",
+  "hidden_states_index": 18,
+  "known_gpu_pending": {
+    "completed_gpu_tasks": [
+      {
+        "result": "Generated artifacts/roundtrip_predictions.npz and refreshed roundtrip outputs for full SSE-level metric auditing.",
+        "script": "scripts/09_eval_roundtrip.py"
+      },
+      {
+        "result": "Updated artifacts/metrics_main.json with merged deterministic template/bootstrap baseline and role-preserving shuffled AV text.",
+        "script": "scripts/10_eval_baselines.py"
+      },
+      {
+        "result": "Generated artifacts/metrics_injection_perturbations.json for 1000 held-out activations.",
+        "script": "scripts/eval_injection_perturbations.py"
+      }
+    ],
+    "pending_gpu_tasks": []
+  },
+  "manifest_generated_with": {
+    "platform": "macOS-10.16-x86_64-i386-64bit",
+    "python": "3.9.13"
+  },
+  "metric_audit_status": "complete",
+  "model": "Qwen/Qwen2.5-Coder-1.5B-Instruct",
+  "n_functions_or_activation_rows": 40000,
+  "n_test_activations": 4000,
+  "n_train_activations": 32000,
+  "n_val_activations": 4000,
+  "notes": {
+    "smoke_artifacts_location": "tests/fixtures/smoke/ and artifacts_smoke/ after running smoke tests",
+    "unknown_fields": []
+  },
+  "pending_gpu_tasks": [],
+  "project": "NLA-CodeScope",
+  "run_type": "full_qwen_main",
+  "runtime": {
+    "environment_spec": "environment.yml",
+    "gpu_used_for_main_run": "NVIDIA A100-PCIE-40GB",
+    "main_run_log": "logs/a100_full_20260605_045246.log",
+    "observed_runtime": "about 8h12m for the June 5 full run"
+  },
+  "runtime_note": "Observed full run about 8h12m on one A100 40GB.",
+  "seed": 17,
+  "split_policy": "by_function_id_and_code_hash",
+  "split_sizes": {
+    "test_functions": 1000,
+    "train_functions": 8000,
+    "val_functions": 1000
+  },
+  "target_block_index_zero_based": 17,
+  "target_layer_label": 18,
+  "test_activations": 4000,
+  "test_functions": 1000,
+  "train_activations": 32000,
+  "train_functions": 8000,
+  "val_activations": 4000,
+  "val_functions": 1000
+}

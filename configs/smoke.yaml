@@ -1,0 +1,86 @@
+seed: 17
+mode: smoke
+output_dir: artifacts_smoke
+data_dir: data_smoke
+
+model:
+  name: "smoke-tiny-deterministic-code-model"
+  target_layer_label: 18
+  target_block_index_zero_based: 17
+  hidden_states_index: 18
+  max_length: 128
+  dtype: "float32"
+  d_model: 64
+
+data:
+  dataset_name: "synthetic Python function smoke dataset"
+  max_functions_train: 20
+  max_functions_val: 5
+  max_functions_test: 5
+  activations_per_function: 1
+  min_tokens: 12
+  max_tokens: 128
+  deduplicate_by_code_hash: true
+  split_policy: "by_function_id_and_code_hash"
+  fallback_synthetic: true
+
+activation:
+  vector_dtype_store: "float16"
+  normalize_for_dir_metrics: true
+
+bootstrap_text:
+  max_tokens: 60
+  include_summary: true
+  include_token_role: true
+  include_nearby_syntax_hint: true
+  no_full_code_copy: true
+  no_pass_fail_info: true
+
+av:
+  backend: "nearest_text_smoke"
+  injection_token: "<ACT>"
+  prompt_template: |
+    You are describing one residual-stream activation from a code language model.
+    The activation vector is inserted inside <act> tags.
+    Write a concise natural-language explanation of the code-relevant information.
+
+    <act><ACT></act>
+    Explanation:
+  lora_r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  epochs_sft: 0
+  epochs_rerank_sft: 0
+  max_new_tokens: 40
+  generation_temperature_eval: 0.0
+  generation_temperature_rerank: 0.7
+  rerank_samples_per_activation: 4
+  no_injection_default: "zero"
+
+ar:
+  backend: "hashed_ridge_smoke"
+  truncate_to_layers: 19
+  use_final_token_state: true
+  value_head: "Linear(d,d,bias=False)"
+  train_loss: "raw_mse"
+  lora_r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  epochs: 0
+  train_two_reconstructors: true
+  feature_dim: 64
+  ridge_lambda: 0.01
+
+metrics:
+  primary: "FVE_raw"
+  secondary: ["FVE_dir", "cosine", "MSE_nrm"]
+  bootstrap_ci: true
+  bootstrap_unit: "function_id"
+  bootstrap_samples: 200
+
+baselines:
+  mean_predictor: true
+  shuffled_av_text: true
+  no_injection_av: true
+  context_only_pseudotext_to_ar: true
+  bootstrap_text_to_ar: true

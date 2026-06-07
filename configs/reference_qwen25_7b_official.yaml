@@ -1,0 +1,9 @@
+seed: 17
+mode: reference
+output_dir: artifacts/reference_official
+model:
+  name: "Qwen/Qwen2.5-7B"
+  av_checkpoint: "kitft/nla-qwen2.5-7b-L20-av"
+  ar_checkpoint: "kitft/nla-qwen2.5-7b-L20-ar"
+  examples: 20
+note: "Optional released-checkpoint sanity path. Main results must come from Qwen2.5-Coder-1.5B."

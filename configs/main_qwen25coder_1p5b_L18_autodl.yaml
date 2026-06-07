@@ -1,0 +1,118 @@
+seed: 17
+mode: main
+output_dir: artifacts
+data_dir: data
+
+runtime:
+  profile: "autodl_single_gpu"
+  require_cuda: true
+  cuda_device: 0
+  hf_home: "${NLA_STORAGE_ROOT}/hf_cache"
+  torch_home: "${NLA_STORAGE_ROOT}/torch_cache"
+  checkpoint_dir: "${NLA_STORAGE_ROOT}/nla-codescope/checkpoints"
+  cuda_alloc_conf: "expandable_segments:True,max_split_size_mb:512"
+  allow_tf32: true
+  matmul_precision: "high"
+  empty_cache_between_stages: true
+  fail_fast_on_missing_gpu: true
+
+model:
+  name: "Qwen/Qwen2.5-Coder-1.5B-Instruct"
+  local_path: "${NLA_STORAGE_ROOT}/modelscope_cache/Qwen/Qwen2___5-Coder-1___5B-Instruct"
+  local_files_only: true
+  target_layer_label: 18
+  target_block_index_zero_based: 17
+  hidden_states_index: 18
+  max_length: 384
+  dtype: "bfloat16"
+  attn_implementation: "sdpa"
+  low_cpu_mem_usage: true
+
+data:
+  dataset_name: "CodeSearchNet Python or compatible"
+  hf_dataset_name: "code_search_net"
+  hf_dataset_config: "python"
+  local_parquet_dir: "${NLA_STORAGE_ROOT}/datasets/codesearchnet-python-raw-457k/data"
+  mirror_dataset_repo: "kejian/codesearchnet-python-raw-457k"
+  max_functions_train: 8000
+  max_functions_val: 1000
+  max_functions_test: 1000
+  activations_per_function: 4
+  min_tokens: 64
+  max_tokens: 384
+  deduplicate_by_code_hash: true
+  split_policy: "by_function_id_and_code_hash"
+  fallback_synthetic: false
+
+activation:
+  vector_dtype_store: "float16"
+  normalize_for_dir_metrics: true
+  extraction_batch_size: 16
+  save_every_batches: 50
+  resume: true
+  cpu_offload_hidden_states: true
+
+bootstrap_text:
+  max_tokens: 60
+  include_summary: true
+  include_token_role: true
+  include_nearby_syntax_hint: true
+  no_full_code_copy: true
+  no_pass_fail_info: true
+
+av:
+  backend: "lora"
+  injection_token: "<ACT>"
+  prompt_template: |
+    You are describing one residual-stream activation from a code language model.
+    The activation vector is inserted inside <act> tags.
+    Write a concise natural-language explanation of the code-relevant information.
+
+    <act><ACT></act>
+    Explanation:
+  lora_r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  epochs_sft: 1
+  epochs_rerank_sft: 1
+  micro_batch_size: 4
+  gradient_accumulation_steps: 4
+  gradient_checkpointing: true
+  max_new_tokens: 80
+  generation_batch_size: 8
+  generation_temperature_eval: 0.0
+  generation_temperature_rerank: 0.7
+  rerank_samples_per_activation: 4
+  no_injection_default: "zero"
+
+ar:
+  backend: "lora"
+  truncate_to_layers: 19
+  use_final_token_state: true
+  value_head: "Linear(d,d,bias=False)"
+  train_loss: "raw_mse"
+  lora_r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  epochs: 1
+  micro_batch_size: 8
+  gradient_accumulation_steps: 2
+  gradient_checkpointing: true
+  train_two_reconstructors: true
+
+metrics:
+  primary: "FVE_raw"
+  secondary:
+    - "FVE_dir"
+    - "cosine"
+    - "MSE_nrm"
+  bootstrap_ci: true
+  bootstrap_unit: "function_id"
+  bootstrap_samples: 1000
+
+baselines:
+  mean_predictor: true
+  shuffled_av_text: true
+  no_injection_av: true
+  context_only_pseudotext_to_ar: true
+  bootstrap_text_to_ar: true

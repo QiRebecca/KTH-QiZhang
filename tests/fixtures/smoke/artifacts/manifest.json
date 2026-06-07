@@ -1,0 +1,105 @@
+{
+  "ar_lora": {
+    "lora_alpha": 32,
+    "lora_dropout": 0.05,
+    "lora_r": 16
+  },
+  "artifacts": {
+    "activations.jsonl": {
+      "bytes": 13586,
+      "sha256": "267a57baa18791ef82728e03fdde11d9bfdd4ad50931533f53773c3a39d48435"
+    },
+    "activations.npz": {
+      "bytes": 3803,
+      "sha256": "12a5f9f57990a267c3107c488302f56703d19d022ee1856da357d45ebf290cf7"
+    },
+    "av_rerank_best.jsonl": {
+      "bytes": 7415,
+      "sha256": "81bc05248b2e1d2e01cea0e79f8bdd16e84186009b517bd6e3359d80591bbed6"
+    },
+    "av_sft_outputs.jsonl": {
+      "bytes": 10886,
+      "sha256": "fdbb67900672e225d2bcce81f79f612143d91209230140e4892e9de53d3c8e74"
+    },
+    "bootstrap_texts.jsonl": {
+      "bytes": 10863,
+      "sha256": "0cb803dace5de47ea9e82853f981154a65999fad7ee8fa9d14540f9b06d542ad"
+    },
+    "metric_audit.json": {
+      "bytes": 1325,
+      "sha256": "b38cd75ce4277806d3fb24bd0a6204d3a70db08037026a4d1b5df8d0ca0e4c54"
+    },
+    "metrics_by_token_role.json": {
+      "bytes": 577,
+      "sha256": "25c14a5b403ba05d95e3144a17a6b1617b83cb218e176d170cbcad1569e6e5bb"
+    },
+    "metrics_main.json": {
+      "bytes": 1767,
+      "sha256": "a63ae740c33f6d644f97751920da96961891b048907e4f0ed3231e5b628bb4f5"
+    },
+    "nla_meta_main.yaml": {
+      "bytes": 803,
+      "sha256": "fd852a9a6db10ff537013b153652d3ae05ee670258ef0e4d08c0f97289150996"
+    },
+    "paired_delta_ci.json": {
+      "bytes": 98,
+      "sha256": "f59144740ac52c8f3f90bf5f5e55b3b7123de7b2813b38468b79de2fbcee4358"
+    },
+    "qualitative_examples.jsonl": {
+      "bytes": 4254,
+      "sha256": "32c9f640e5861501966b0fd54ef2fa8b8de48f022af60ff3cd41946c9c102997"
+    },
+    "roundtrip_outputs.jsonl": {
+      "bytes": 3243,
+      "sha256": "a6845605d930e705c7426a79e7d51d2d5b06fa67bd20006633cce4cfd08cc686"
+    }
+  },
+  "av_lora": {
+    "lora_alpha": 32,
+    "lora_dropout": 0.05,
+    "lora_r": 16
+  },
+  "commands": [
+    "PYTHON=/root/miniconda3/bin/python bash scripts/run_main_a100.sh",
+    "python scripts/audit_metrics.py --config configs/main_qwen25coder_1p5b_L18_a100_autodl.yaml",
+    "python scripts/reproduce_figures.py --config configs/main_qwen25coder_1p5b_L18_a100_autodl.yaml"
+  ],
+  "d_model": 64,
+  "hidden_states_index": 18,
+  "known_gpu_pending": {
+    "pending_gpu_tasks": [
+      {
+        "reason": "Regenerate roundtrip_predictions.npz for the June 5 full run. The original run saved text outputs and aggregate metrics but not h_hat arrays, so full CPU metric auditing is not possible until this is rerun.",
+        "script": "scripts/09_eval_roundtrip.py",
+        "suggested_command": "python scripts/09_eval_roundtrip.py --config configs/main_qwen25coder_1p5b_L18_a100_autodl.yaml"
+      },
+      {
+        "reason": "Recompute metrics_main.json with merged deterministic template baseline and role-preserving shuffled AV text.",
+        "script": "scripts/10_eval_baselines.py",
+        "suggested_command": "python scripts/10_eval_baselines.py --config configs/main_qwen25coder_1p5b_L18_a100_autodl.yaml"
+      },
+      {
+        "reason": "Optional diagnostic requiring AV/AR model inference: compare correct, zero, shuffled, Gaussian, and fixed activation injection.",
+        "script": "scripts/eval_injection_perturbations.py",
+        "suggested_command": "python scripts/eval_injection_perturbations.py --config configs/main_qwen25coder_1p5b_L18_a100_autodl.yaml --max-samples 1000"
+      }
+    ]
+  },
+  "model": "smoke-tiny-deterministic-code-model",
+  "n_functions_or_activation_rows": 30,
+  "n_test_activations": 5,
+  "n_train_activations": 20,
+  "n_val_activations": 5,
+  "project": "NLA-CodeScope",
+  "runtime": {
+    "gpu_used_for_main_run": "NVIDIA A100-PCIE-40GB",
+    "main_run_log": "logs/a100_full_20260605_045246.log",
+    "observed_runtime": "about 8h12m for the June 5 full run",
+    "platform": "macOS-10.16-x86_64-i386-64bit",
+    "python": "3.9.13"
+  },
+  "seed": 17,
+  "split_policy": "by_function_id_and_code_hash",
+  "target_block_index_zero_based": 17,
+  "target_layer_label": 18
+}
