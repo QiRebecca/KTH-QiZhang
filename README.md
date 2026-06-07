@@ -129,12 +129,14 @@ Artifact-level metric and figure reproduction does not require GPU. Full extract
 
 ```bash
 pytest -q
+python3 scripts/validate_repository_format.py
 python3 scripts/verify_submission_consistency.py
 python3 scripts/audit_metrics.py --artifacts artifacts --require-complete
 python3 scripts/reproduce_metrics_from_artifacts.py --artifacts artifacts
 python3 scripts/reproduce_figures.py --artifacts artifacts --figures figures
 python3 scripts/check_submission_ready.py
 bash scripts/run_smoke_test.sh
+python3 scripts/validate_public_repo.py --repo-url https://github.com/QiRebecca/KTH-QiZhang --branch main
 ```
 
 The largest included file is [`artifacts/activations.npz`](artifacts/activations.npz), about 90 MB. No artifact exceeds 100 MB in this repository state, so Git LFS is not required for the current files. If a hosting service rejects large regular files, track `artifacts/*.npz` with Git LFS before pushing.

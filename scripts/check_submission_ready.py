@@ -204,6 +204,9 @@ def main() -> None:
                     errors.append(f"overclaim phrase in README.md: {phrase}")
 
     if not args.skip_pytest:
+        format_check = subprocess.run([sys.executable, "scripts/validate_repository_format.py"], cwd=root)
+        if format_check.returncode != 0:
+            errors.append("repository format validation failed")
         consistency = subprocess.run([sys.executable, "scripts/verify_submission_consistency.py"], cwd=root)
         if consistency.returncode != 0:
             errors.append("submission consistency check failed")

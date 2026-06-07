@@ -19,6 +19,8 @@ This is the submission self-check I use before packaging the repository.
 | Smoke artifacts are isolated. | PASS | Smoke writes to `data_smoke/`, `artifacts_smoke/`, and `figures_smoke/`; full artifacts stay under `artifacts/`. |
 | Artifact reproduction is CPU-friendly where possible. | PASS | `scripts/reproduce_metrics_from_artifacts.py` and `scripts/reproduce_figures.py` rebuild tables and figures from saved artifacts. |
 | Large-file policy is checked. | PASS | No file currently exceeds 100 MB; `scripts/check_submission_ready.py` fails if a future file does. |
+| Local file formats are parseable. | PASS | `scripts/validate_repository_format.py` compiles Python, checks shell syntax, parses YAML/TOML/JSON/JSONL, and detects line-collapsed Markdown/code. |
+| Public raw GitHub view matches fresh clone. | PASS | `scripts/validate_public_repo.py` fresh-clones GitHub, downloads selected `raw.githubusercontent.com` files, compares SHA-256 hashes and line counts, and parses both views. |
 
 ## Remaining Acceptable Limitations
 
@@ -32,6 +34,7 @@ This is the submission self-check I use before packaging the repository.
 
 ```bash
 pytest -q
+python3 scripts/validate_repository_format.py
 python3 scripts/verify_submission_consistency.py
 python3 scripts/audit_metrics.py --artifacts artifacts --require-complete
 python3 scripts/reproduce_metrics_from_artifacts.py --artifacts artifacts
@@ -40,4 +43,5 @@ python3 scripts/check_submission_ready.py
 bash scripts/run_smoke_test.sh
 python3 scripts/verify_submission_consistency.py
 python3 scripts/check_submission_ready.py
+python3 scripts/validate_public_repo.py --repo-url https://github.com/QiRebecca/KTH-QiZhang --branch main
 ```
