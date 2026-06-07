@@ -1,6 +1,6 @@
 # Natural-language autoencoding of Qwen2.5-Coder activations
 
-I reimplemented a small Natural Language Autoencoder (NLA) for residual-stream activations in `Qwen/Qwen2.5-Coder-1.5B-Instruct`. The target is layer 18 of 28 on Python function code. The final AV evaluation is activation-only: the verbalizer receives a fixed prompt plus an injected activation vector, with no source code, token text, function name, docstring, summary, local context, prefix, suffix, token role, or labels. The main result is mixed. AV-RerankSFT improves directional reconstruction over AV-SFT, no-injection, shuffled-text, role-preserving shuffled-text, and deterministic template controls, but $\mathrm{FVE}_{\mathrm{raw}}$ remains near zero and $\mathrm{FVE}_{\mathrm{dir}}$ remains negative. I interpret the generated text as weak reconstruction evidence: it carries measurable activation-specific directional information, but it is not a high-fidelity reconstruction channel. On code tokens, broad semantic/syntactic roles are more recoverable than exact literals, local control flow, tokenization detail, or activation magnitude.
+I reimplemented a small Natural Language Autoencoder (NLA) for residual-stream activations in `Qwen/Qwen2.5-Coder-1.5B-Instruct`. The target is layer 18 of 28 on Python function code. The final AV evaluation is activation-only: the verbalizer receives a fixed prompt plus an injected activation vector, with no source code, token text, function name, docstring, summary, local context, prefix, suffix, token role, or labels. The main result is mixed. AV-RerankSFT improves directional reconstruction over AV-SFT, no-injection, shuffled-text, role-preserving shuffled-text, and deterministic template controls, but FVE<sub>raw</sub> remains near zero and FVE<sub>dir</sub> remains negative. I interpret the generated text as weak reconstruction evidence: it carries measurable activation-specific directional information, but it is not a high-fidelity reconstruction channel. On code tokens, broad semantic/syntactic roles are more recoverable than exact literals, local control flow, tokenization detail, or activation magnitude.
 
 ## Research Question
 
@@ -10,7 +10,7 @@ This is a controlled small-model stress test of the NLA idea, not an Anthropic-s
 
 ## Method
 
-The target model is frozen. I extract a residual-stream hidden state $h$, inject it into the AV prompt at `<ACT>`, generate text, and reconstruct $\hat{h}$ from that text with AR:
+The target model is frozen. I extract a residual-stream hidden state `h`, inject it into the AV prompt at `<ACT>`, generate text, and reconstruct `h_hat` from that text with AR:
 
 ```mermaid
 flowchart LR
@@ -36,9 +36,9 @@ flowchart LR
     class M,N metric;
 ```
 
-In the diagram, "Residual activation h" is the extracted vector $h$, and "Reconstructed activation h-hat" is the AR prediction $\hat{h}$.
+In the diagram, "Residual activation h" is the extracted vector `h`, and "Reconstructed activation h-hat" is the AR prediction `h_hat`.
 
-Layer convention is fixed in [`artifacts/nla_meta_main.yaml`](artifacts/nla_meta_main.yaml): `target_layer_label = 18` for reporting, `target_block_index_zero_based = 17`, and HuggingFace extraction uses `hidden_states[18]` because `hidden_states[0]` is the embedding output. The model width is $d_{\mathrm{model}} = 1536$.
+Layer convention is fixed in [`artifacts/nla_meta_main.yaml`](artifacts/nla_meta_main.yaml): `target_layer_label = 18` for reporting, `target_block_index_zero_based = 17`, and HuggingFace extraction uses `hidden_states[18]` because `hidden_states[0]` is the embedding output. The model width is d<sub>model</sub> = 1536.
 
 The AV uses the same base model with a special `<ACT>` token whose embedding is replaced by a scaled activation vector; see [`nla_codescope/injection.py`](nla_codescope/injection.py). The AR is a truncated 19-layer Qwen backbone with a final-token state and `Linear(d,d,bias=False)` value head. I train two ARs: `AR_train` is used only to score rerank candidates, while independent `AR_eval` is used for final metrics.
 
@@ -52,8 +52,8 @@ Result names use `X -> AR_eval` to mean: generate or choose text with method `X`
 
 | name | meaning in this repository |
 |---|---|
-| $h$ | The extracted layer-18 residual activation for one target token. |
-| $\hat{h}$ | The activation reconstructed by AR from text. |
+| `h` | The extracted layer-18 residual activation for one target token. |
+| `h_hat` | The activation reconstructed by AR from text. |
 | AV | Activation Verbalizer: maps an injected activation vector to text. |
 | AR | Activation Reconstructor: maps text back to an activation vector. |
 | `AR_train` | Reconstructor used only to score rerank candidates during training. |
@@ -121,17 +121,17 @@ $$
 }.
 $$
 
-Here $\bar{h}_{\mathrm{train}}$ is the raw train-split activation mean, and $\bar{u}_{\mathrm{train}}$ is the train-split mean after per-vector normalization.
+Here the raw train mean is the activation-space mean used in the FVE<sub>raw</sub> denominator, and the directional train mean is the mean after per-vector normalization.
 
-FVE can be negative. $\mathrm{FVE}_{\mathrm{raw}}$ scores magnitude and direction; $\mathrm{FVE}_{\mathrm{dir}}$ scores normalized direction. The mean predictor is exactly the $\mathrm{FVE}_{\mathrm{raw}}$ denominator baseline, but not the $\mathrm{FVE}_{\mathrm{dir}}$ baseline because directional scoring normalizes the prediction before measuring error.
+FVE can be negative. FVE<sub>raw</sub> scores magnitude and direction; FVE<sub>dir</sub> scores normalized direction. The mean predictor is exactly the FVE<sub>raw</sub> denominator baseline, but not the FVE<sub>dir</sub> baseline because directional scoring normalizes the prediction before measuring error.
 
-The metric audit in [`artifacts/metric_audit.json`](artifacts/metric_audit.json) is complete. It recomputes raw/directional SSE from [`artifacts/roundtrip_predictions.npz`](artifacts/roundtrip_predictions.npz), checks that role SSEs and denominators sum to global values, and verifies $\mathrm{MSE}_{\mathrm{nrm}} = 2(1-\mathrm{cosine})$. Metric definitions are in [`docs/metric_definitions.md`](docs/metric_definitions.md).
+The metric audit in [`artifacts/metric_audit.json`](artifacts/metric_audit.json) is complete. It recomputes raw/directional SSE from [`artifacts/roundtrip_predictions.npz`](artifacts/roundtrip_predictions.npz), checks that role SSEs and denominators sum to global values, and verifies MSE<sub>nrm</sub> = 2(1 - cosine). Metric definitions are in [`docs/metric_definitions.md`](docs/metric_definitions.md).
 
-One audit issue matters for interpretation. Role-level raw FVE can be misleading if averaged by sample count: the sample-weighted role average is $+0.2793$, while global $\mathrm{FVE}_{\mathrm{raw}}=-0.00036$. The reason is denominator mass: the `keyword` group has only 52 examples but contributes 98.86% of the raw-FVE denominator and 99.18% of raw SSE. Denominator weighting recovers the global raw FVE. For token-role discussion I therefore emphasize cosine, $\mathrm{MSE}_{\mathrm{nrm}}$, and $\mathrm{FVE}_{\mathrm{dir}}$; the denominator breakdown is in [`artifacts/role_fve_raw_denominator_breakdown.json`](artifacts/role_fve_raw_denominator_breakdown.json).
+One audit issue matters for interpretation. Role-level raw FVE can be misleading if averaged by sample count: the sample-weighted role average is +0.2793, while global FVE<sub>raw</sub> = -0.00036. The reason is denominator mass: the `keyword` group has only 52 examples but contributes 98.86% of the raw-FVE denominator and 99.18% of raw SSE. Denominator weighting recovers the global raw FVE. For token-role discussion I therefore emphasize cosine, MSE<sub>nrm</sub>, and FVE<sub>dir</sub>; the denominator breakdown is in [`artifacts/role_fve_raw_denominator_breakdown.json`](artifacts/role_fve_raw_denominator_breakdown.json).
 
 ## Main Results
 
-| Method | $\mathrm{FVE}_{\mathrm{raw}}$ | $\mathrm{FVE}_{\mathrm{dir}}$ | Cosine | $\mathrm{MSE}_{\mathrm{nrm}}$ |
+| Method | FVE<sub>raw</sub> | FVE<sub>dir</sub> | Cosine | MSE<sub>nrm</sub> |
 |---|---:|---:|---:|---:|
 | Mean predictor | 0.0000 | -0.5102 | 0.5267 | 0.9465 |
 | Shuffled AV text | -0.0057 | -0.3483 | 0.5775 | 0.8451 |
@@ -143,11 +143,11 @@ One audit issue matters for interpretation. Role-level raw FVE can be misleading
 
 The deterministic template/bootstrap row is a context-derived pseudo-text control implemented by the same deterministic template used for bootstrap training. It is a prior/control, not an upper bound.
 
-AV-RerankSFT has the best directional reconstruction among tested AV variants. Its 95% bootstrap CIs over function id are: $\mathrm{FVE}_{\mathrm{raw}} \in [-0.00135, 0.00169]$, $\mathrm{FVE}_{\mathrm{dir}} \in [-0.12785, -0.12065]$, cosine $\in [0.64523, 0.65015]$, and $\mathrm{MSE}_{\mathrm{nrm}} \in [0.69971, 0.70955]$. The main bar chart is [`figures/main_fve_bar.png`](figures/main_fve_bar.png): it shows the directional improvement over controls while all directional FVE values remain negative.
+AV-RerankSFT has the best directional reconstruction among tested AV variants. Its 95% bootstrap CIs over function id are: FVE<sub>raw</sub> in [-0.00135, 0.00169], FVE<sub>dir</sub> in [-0.12785, -0.12065], cosine in [0.64523, 0.65015], and MSE<sub>nrm</sub> in [0.69971, 0.70955]. The main bar chart is [`figures/main_fve_bar.png`](figures/main_fve_bar.png): it shows the directional improvement over controls while all directional FVE values remain negative.
 
 Paired bootstrap deltas in [`artifacts/paired_delta_ci_all_baselines.json`](artifacts/paired_delta_ci_all_baselines.json) use function id as the resampling unit:
 
-| paired comparison | $\Delta\mathrm{FVE}_{\mathrm{dir}}$ | 95% CI |
+| paired comparison | Delta FVE<sub>dir</sub> | 95% CI |
 |---|---:|---:|
 | AV-RerankSFT vs AV-SFT | +0.0348 | [0.0311, 0.0387] |
 | AV-RerankSFT vs no-injection AV | +0.2630 | [0.2591, 0.2669] |
@@ -157,7 +157,7 @@ Paired bootstrap deltas in [`artifacts/paired_delta_ci_all_baselines.json`](arti
 
 An injection perturbation diagnostic on 1,000 held-out activations checks whether AV uses the vector rather than only a generic language prior:
 
-| injection condition | $\mathrm{FVE}_{\mathrm{dir}}$ | cosine |
+| injection condition | FVE<sub>dir</sub> | cosine |
 |---|---:|---:|
 | correct activation | -0.1239 | 0.6470 |
 | zero vector | -0.3912 | 0.5630 |
@@ -170,7 +170,7 @@ Correct activation is clearly better than the perturbations, so the AV is using 
 
 ## Token-role Analysis
 
-| role | $n$ | $\mathrm{FVE}_{\mathrm{raw}}$ | $\mathrm{FVE}_{\mathrm{dir}}$ | cosine |
+| role | n | FVE<sub>raw</sub> | FVE<sub>dir</sub> | cosine |
 |---|---:|---:|---:|---:|
 | identifier | 1,337 | 0.3163 | -0.0476 | 0.6951 |
 | operator/punctuation | 1,485 | 0.2658 | -0.1479 | 0.6567 |
@@ -187,7 +187,7 @@ The pattern in [`figures/token_role_breakdown.png`](figures/token_role_breakdown
 
 ## Limitations
 
-$\mathrm{FVE}_{\mathrm{dir}}$ remains negative and $\mathrm{FVE}_{\mathrm{raw}}$ is near zero. The texts are reconstruction-constrained hypotheses, not direct interpretations. Reconstruction evidence is not an intervention; I do not run activation patching, steering, or code-correctness causal tests. RerankSFT is a best-of-4 SFT approximation, not Anthropic-scale RL. Deterministic bootstrap pseudo-texts are weak training targets, not labels. The experiment uses one small model and one target layer. Code correctness is not directly evaluated, and exact literals, local control flow, tokenization details, and magnitude remain weakly represented by the natural-language bottleneck.
+FVE<sub>dir</sub> remains negative and FVE<sub>raw</sub> is near zero. The texts are reconstruction-constrained hypotheses, not direct interpretations. Reconstruction evidence is not an intervention; I do not run activation patching, steering, or code-correctness causal tests. RerankSFT is a best-of-4 SFT approximation, not Anthropic-scale RL. Deterministic bootstrap pseudo-texts are weak training targets, not labels. The experiment uses one small model and one target layer. Code correctness is not directly evaluated, and exact literals, local control flow, tokenization details, and magnitude remain weakly represented by the natural-language bottleneck.
 
 ## Reproducibility
 

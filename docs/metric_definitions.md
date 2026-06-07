@@ -1,8 +1,8 @@
 # Metric Definitions
 
-Let $h_i$ be a held-out target activation and $\hat{h}_i$ be the AR
-reconstruction from generated text. Let $\bar{h}_{\mathrm{train}}$ be the mean
-raw activation over the train split.
+Let `h_i` be a held-out target activation and `h_hat_i` be the AR
+reconstruction from generated text. Let `hbar_train` be the mean raw activation
+over the train split. The display equations below give the mathematical form.
 
 Raw fraction of variance explained:
 
@@ -63,13 +63,13 @@ $$
 ## Mean Predictor
 
 The "Mean predictor" row repeats the raw train mean for every test sample. This
-is exactly the denominator baseline for $\mathrm{FVE}_{\mathrm{raw}}$, so its
-$\mathrm{FVE}_{\mathrm{raw}}$ is zero up to numerical precision.
+is exactly the denominator baseline for FVE<sub>raw</sub>, so its
+FVE<sub>raw</sub> is zero up to numerical precision.
 
-It is not the denominator baseline for $\mathrm{FVE}_{\mathrm{dir}}$.
+It is not the denominator baseline for FVE<sub>dir</sub>.
 Directional scoring normalizes both target and prediction before measuring
 error. Normalizing the raw train mean changes the geometry, so the
-mean-predictor row can have negative $\mathrm{FVE}_{\mathrm{dir}}$.
+mean-predictor row can have negative FVE<sub>dir</sub>.
 
 ## Token-role FVE
 
@@ -101,11 +101,11 @@ The audit writes `artifacts/role_fve_raw_denominator_breakdown.json` with:
 - `raw_den_share`: the role's share of global raw denominator.
 - `raw_sse_share`: the role's share of global raw SSE.
 - `fve_raw_from_sse`: the role FVE recomputed from its SSE and denominator.
-- directional equivalents for $\mathrm{FVE}_{\mathrm{dir}}$.
+- directional equivalents for FVE<sub>dir</sub>.
 - denominator-weighted and sample-weighted role aggregations.
 
 This is why the table can show positive raw-FVE values for several roles while
-the global $\mathrm{FVE}_{\mathrm{raw}}$ is near zero. The global metric is
+the global FVE<sub>raw</sub> is near zero. The global metric is
 dominated by the roles and examples that carry most denominator mass and
 reconstruction error, not by an unweighted average of role rows.
 
@@ -113,6 +113,6 @@ In the reported run, this caveat is not hypothetical. The `keyword` role has
 only 52 test examples but accounts for about 98.86% of the raw-FVE denominator
 and 99.18% of raw SSE. As a result, a sample-weighted average of role raw-FVEs
 is positive while the true global raw FVE is near zero. The README therefore
-uses role-level cosine, $\mathrm{MSE}_{\mathrm{nrm}}$, and
-$\mathrm{FVE}_{\mathrm{dir}}$ for interpretation, and treats role-level raw FVE
+uses role-level cosine, MSE<sub>nrm</sub>, and
+FVE<sub>dir</sub> for interpretation, and treats role-level raw FVE
 as an audited diagnostic rather than the headline result.

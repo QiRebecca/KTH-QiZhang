@@ -20,7 +20,7 @@ The code context is shown only for human inspection and was not provided to the 
 - token_role: `function_name_or_identifier`
 - target_token: `get_file_network_traffic`
 - cosine: `0.7985`
-- $\mathrm{MSE}_{\mathrm{nrm}}$: `0.4031`
+- MSE<sub>nrm</sub>: `0.4031`
 - interpretation: Identifier success: highest-cosine identifier example under the deterministic selection policy.
 
 AV text:
@@ -42,7 +42,7 @@ def get_file_network_traffic(self, resources): """Retrieves a report about the n
 - token_role: `operator_or_punctuation`
 - target_token: `(`
 - cosine: `0.6844`
-- $\mathrm{MSE}_{\mathrm{nrm}}$: `0.6312`
+- MSE<sub>nrm</sub>: `0.6312`
 - interpretation: Operator partial: operator/punctuation sample closest to the median cosine for that role.
 
 AV text:
@@ -64,7 +64,7 @@ def ms_to_datetime(ms, tzinfo=None): """Convert a millisecond time value to an o
 - token_role: `literal_string_or_number`
 - target_token: `2`
 - cosine: `0.3449`
-- $\mathrm{MSE}_{\mathrm{nrm}}$: `1.3103`
+- MSE<sub>nrm</sub>: `1.3103`
 - interpretation: Literal failure: highest-MSE literal example, illustrating loss of exact symbolic information.
 
 AV text:
@@ -86,7 +86,7 @@ def rle_encode(img:NPArrayMask)->str: "Return run-length encoding string from `i
 - token_role: `return_raise_yield_branch`
 - target_token: `if`
 - cosine: `0.2501`
-- $\mathrm{MSE}_{\mathrm{nrm}}$: `1.4999`
+- MSE<sub>nrm</sub>: `1.4999`
 - interpretation: Generic failure: low-cosine example with nontrivial generated text length.
 
 AV text:
@@ -108,7 +108,7 @@ def alexnet(pretrained=False, **kwargs): r"""AlexNet model architecture from the
 - token_role: `operator_or_punctuation`
 - target_token: `(`
 - cosine: `0.6809`
-- $\mathrm{MSE}_{\mathrm{nrm}}$: `0.6383`
+- MSE<sub>nrm</sub>: `0.6383`
 - interpretation: Seeded random check: deterministic random test-set example for calibration.
 
 AV text:
