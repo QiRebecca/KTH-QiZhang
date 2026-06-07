@@ -160,7 +160,12 @@ def _clone_public_repo(repo_url: str, branch: str, clone: Path) -> tuple[bool, s
             if result.returncode == 0:
                 return True, last_output
         except subprocess.TimeoutExpired as exc:
-            last_output = (exc.stdout or "") + f"\nclone attempt {attempt} timed out after 180 seconds"
+            stdout = exc.stdout or b""
+            if isinstance(stdout, bytes):
+                stdout_text = stdout.decode("utf-8", errors="replace")
+            else:
+                stdout_text = stdout
+            last_output = stdout_text + f"\nclone attempt {attempt} timed out after 180 seconds"
         if attempt < 3:
             time.sleep(5 * attempt)
     return False, last_output
