@@ -46,6 +46,26 @@ Bootstrap texts are deterministic pseudo-texts from summary/docstring, token rol
 
 The activation-only invariant is tested in [`tests/test_av_no_context_eval.py`](tests/test_av_no_context_eval.py). The final evaluation batch contains only `activation_id`, fixed `prompt`, and `activation_vector`.
 
+## Notation and Table Names
+
+Result names use `X -> AR_eval` to mean: generate or choose text with method `X`, then reconstruct that text with the independent evaluation reconstructor `AR_eval`.
+
+| name | meaning in this repository |
+|---|---|
+| $h$ | The extracted layer-18 residual activation for one target token. |
+| $\hat{h}$ | The activation reconstructed by AR from text. |
+| AV | Activation Verbalizer: maps an injected activation vector to text. |
+| AR | Activation Reconstructor: maps text back to an activation vector. |
+| `AR_train` | Reconstructor used only to score rerank candidates during training. |
+| `AR_eval` | Separately trained reconstructor used for all reported final metrics. |
+| `AV-SFT` | AV after supervised fine-tuning on deterministic bootstrap pseudo-texts. |
+| `AV-RerankSFT` | AV after one best-of-4 rerank-SFT pass scored by `AR_train`. |
+| Mean predictor | Predicts the train-split mean activation; no text is generated. |
+| Shuffled AV text | Uses real AV text, but shuffles text across test activations. |
+| Role-preserving shuffled AV text | Shuffles AV text only within the same token-role group. |
+| No-injection AV | Runs the AV without the sample-specific activation injected at `<ACT>`. |
+| Deterministic template/bootstrap text | Feeds deterministic context-derived pseudo-text directly to `AR_eval`; this is a control, not an activation-only roundtrip. |
+
 ## Experimental Setup
 
 The main run uses CodeSearchNet-style Python function data. See [`docs/data_card.md`](docs/data_card.md) for source and filtering details.

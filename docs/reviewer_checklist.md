@@ -9,6 +9,7 @@ This is the submission self-check I use before packaging the repository.
 | Layer convention is explicit. | PASS | `artifacts/nla_meta_main.yaml` records reported layer 18, zero-based block 17, and hidden-state index 18. |
 | This is NLA rather than code summarization. | PASS | Final AV input is fixed prompt plus injected activation vector; context-derived text appears only in bootstrap/control rows. |
 | `AR_train` and `AR_eval` are separated. | PASS | README and manifest state that `AR_train` is used only for reranking and independent `AR_eval` is used for final metrics. |
+| Custom table names are defined. | PASS | README's "Notation and Table Names" section defines AV, AR, `AR_train`, `AR_eval`, `AV-SFT`, `AV-RerankSFT`, and the control rows. |
 | Main baselines are present. | PASS | Main table includes mean, shuffled, role-preserving shuffled, no-injection, deterministic template/bootstrap, AV-SFT, and AV-RerankSFT. |
 | Injection perturbation controls are present. | PASS | `artifacts/metrics_injection_perturbations.json` reports correct, zero, mean, shuffled, gaussian norm-matched, and fixed-first activation controls. |
 | FVE formulas are clear. | PASS | `README.md` and `docs/metric_definitions.md` define $\mathrm{FVE}_{\mathrm{raw}}$, $\mathrm{FVE}_{\mathrm{dir}}$, cosine, and $\mathrm{MSE}_{\mathrm{nrm}}$. |
