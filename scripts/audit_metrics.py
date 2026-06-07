@@ -8,14 +8,14 @@ vectors, it emits a partial audit explaining which checks cannot be run.
 """
 
 import json
+import math
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 
 from common import parse_config, split_indices, subset
-from nla_codescope.metrics import compute_metrics, per_row_scores
-from nla_codescope.utils import l2_normalize, out_path, read_vectors, write_json
+from nla_codescope.utils import out_path, read_vectors, write_json
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -25,23 +25,96 @@ def _load_json(path: Path) -> dict[str, Any]:
         return json.load(f)
 
 
-def _sse_raw(h: np.ndarray, pred: np.ndarray, train_h: np.ndarray) -> tuple[float, float, float]:
-    mean_train = train_h.astype(np.float64).mean(axis=0, keepdims=True)
-    h64 = h.astype(np.float64)
-    p64 = pred.astype(np.float64)
-    sse = float(np.sum((h64 - p64) ** 2))
-    den = float(np.sum((h64 - mean_train) ** 2))
-    return sse, den, float(1.0 - sse / max(den, 1e-12))
+def _json_close(a: Any, b: Any) -> bool:
+    if isinstance(a, float) or isinstance(b, float):
+        try:
+            return math.isclose(float(a), float(b), rel_tol=1e-12, abs_tol=1e-6)
+        except (TypeError, ValueError):
+            return False
+    if isinstance(a, dict) and isinstance(b, dict):
+        return set(a) == set(b) and all(_json_close(a[k], b[k]) for k in a)
+    if isinstance(a, list) and isinstance(b, list):
+        return len(a) == len(b) and all(_json_close(x, y) for x, y in zip(a, b))
+    return a == b
 
 
-def _sse_dir(h: np.ndarray, pred: np.ndarray, train_h: np.ndarray) -> tuple[float, float, float]:
-    train_norm = l2_normalize(train_h.astype(np.float64))
-    h_norm = l2_normalize(h.astype(np.float64))
-    p_norm = l2_normalize(pred.astype(np.float64))
-    mean_train = train_norm.mean(axis=0, keepdims=True)
-    sse = float(np.sum((h_norm - p_norm) ** 2))
-    den = float(np.sum((h_norm - mean_train) ** 2))
-    return sse, den, float(1.0 - sse / max(den, 1e-12))
+def _write_json_if_changed(path: Path, obj: Any) -> None:
+    if path.exists():
+        try:
+            existing = json.loads(path.read_text(encoding="utf-8"))
+            if _json_close(existing, obj):
+                return
+        except Exception:
+            pass
+    write_json(path, obj)
+
+
+def _normalize_rows(x: np.ndarray) -> np.ndarray:
+    norms = np.linalg.norm(x, axis=1, keepdims=True)
+    return x / np.maximum(norms, 1e-12)
+
+
+def _train_means(train_h: np.ndarray, chunk_size: int = 1024) -> tuple[np.ndarray, np.ndarray]:
+    raw_sum = np.zeros(train_h.shape[1], dtype=np.float64)
+    norm_sum = np.zeros(train_h.shape[1], dtype=np.float64)
+    n = 0
+    for start in range(0, train_h.shape[0], chunk_size):
+        x = train_h[start : start + chunk_size].astype(np.float64, copy=False)
+        raw_sum += x.sum(axis=0)
+        norm_sum += _normalize_rows(x).sum(axis=0)
+        n += x.shape[0]
+    return raw_sum / max(n, 1), norm_sum / max(n, 1)
+
+
+def _per_row_components(
+    h: np.ndarray,
+    pred: np.ndarray,
+    mean_train: np.ndarray,
+    mean_train_norm: np.ndarray,
+    chunk_size: int = 1024,
+) -> dict[str, np.ndarray]:
+    if h.shape != pred.shape:
+        raise ValueError(f"h and prediction shape mismatch: {h.shape} vs {pred.shape}")
+    n = h.shape[0]
+    out = {
+        "raw_num": np.empty(n, dtype=np.float64),
+        "raw_den": np.empty(n, dtype=np.float64),
+        "dir_num": np.empty(n, dtype=np.float64),
+        "dir_den": np.empty(n, dtype=np.float64),
+        "cosine": np.empty(n, dtype=np.float64),
+        "MSE_nrm": np.empty(n, dtype=np.float64),
+    }
+    for start in range(0, n, chunk_size):
+        end = min(start + chunk_size, n)
+        x = h[start:end].astype(np.float64, copy=False)
+        y = pred[start:end].astype(np.float64, copy=False)
+        x_norm = _normalize_rows(x)
+        y_norm = _normalize_rows(y)
+        raw_num = np.sum((x - y) ** 2, axis=1)
+        raw_den = np.sum((x - mean_train) ** 2, axis=1)
+        dir_num = np.sum((x_norm - y_norm) ** 2, axis=1)
+        dir_den = np.sum((x_norm - mean_train_norm) ** 2, axis=1)
+        cosine = np.sum(x_norm * y_norm, axis=1)
+        out["raw_num"][start:end] = raw_num
+        out["raw_den"][start:end] = raw_den
+        out["dir_num"][start:end] = dir_num
+        out["dir_den"][start:end] = dir_den
+        out["cosine"][start:end] = cosine
+        out["MSE_nrm"][start:end] = dir_num
+    return out
+
+
+def _aggregate_metrics(components: dict[str, np.ndarray]) -> dict[str, float]:
+    raw_num = float(components["raw_num"].sum())
+    raw_den = float(components["raw_den"].sum())
+    dir_num = float(components["dir_num"].sum())
+    dir_den = float(components["dir_den"].sum())
+    return {
+        "FVE_raw": float(1.0 - raw_num / max(raw_den, 1e-12)),
+        "FVE_dir": float(1.0 - dir_num / max(dir_den, 1e-12)),
+        "cosine": float(components["cosine"].mean()),
+        "MSE_nrm": float(components["MSE_nrm"].mean()),
+    }
 
 
 def _check_or_raise(report: dict[str, Any]) -> None:
@@ -115,7 +188,7 @@ def main() -> None:
             "roundtrip_predictions.npz is missing, so raw SSE, directional SSE, and exact FVE recomputation cannot be audited for this run. "
             "Regenerate from scripts/09_eval_roundtrip.py after the code update to enable full CPU-only auditing."
         )
-        write_json(out_path(cfg, "metric_audit.json"), report)
+        _write_json_if_changed(out_path(cfg, "metric_audit.json"), report)
         print(json.dumps(report, indent=2, sort_keys=True))
         if cfg.get("_require_complete"):
             raise SystemExit("metric audit is partial; roundtrip_predictions.npz is required")
@@ -127,10 +200,15 @@ def main() -> None:
         raise ValueError("roundtrip_predictions.npz activation_ids do not match current test split")
     pred = pred_data["pred_rerank"].astype(np.float32)
     report["status"] = "complete"
-    raw_sse, raw_den, raw_fve = _sse_raw(h_test, pred, h_train)
-    dir_sse, dir_den, dir_fve = _sse_dir(h_test, pred, h_train)
-    recomputed = compute_metrics(h_test, pred, h_train)
-    row_scores = per_row_scores(h_test, pred)
+    mean_train, mean_train_norm = _train_means(h_train)
+    row_scores = _per_row_components(h_test, pred, mean_train, mean_train_norm)
+    recomputed = _aggregate_metrics(row_scores)
+    raw_sse = float(row_scores["raw_num"].sum())
+    raw_den = float(row_scores["raw_den"].sum())
+    raw_fve = float(1.0 - raw_sse / max(raw_den, 1e-12))
+    dir_sse = float(row_scores["dir_num"].sum())
+    dir_den = float(row_scores["dir_den"].sum())
+    dir_fve = float(1.0 - dir_sse / max(dir_den, 1e-12))
     report["global_recomputed"] = {
         **recomputed,
         "raw_sse": raw_sse,
@@ -149,8 +227,12 @@ def main() -> None:
     raw_sse_sum = raw_den_sum = dir_sse_sum = dir_den_sum = 0.0
     for role in sorted(set(roles)):
         idx = np.array([i for i, r in enumerate(roles) if r == role], dtype=np.int64)
-        rsse, rden, rfve = _sse_raw(h_test[idx], pred[idx], h_train)
-        dsse, dden, dfve = _sse_dir(h_test[idx], pred[idx], h_train)
+        rsse = float(row_scores["raw_num"][idx].sum())
+        rden = float(row_scores["raw_den"][idx].sum())
+        rfve = float(1.0 - rsse / max(rden, 1e-12))
+        dsse = float(row_scores["dir_num"][idx].sum())
+        dden = float(row_scores["dir_den"][idx].sum())
+        dfve = float(1.0 - dsse / max(dden, 1e-12))
         raw_sse_sum += rsse
         raw_den_sum += rden
         dir_sse_sum += dsse
@@ -221,8 +303,8 @@ def main() -> None:
     report["checks"]["denominator_weighted_role_fve_raw_equals_global_fve_raw"] = abs(denominator_weighted_raw - raw_fve) < 1e-10
     report["checks"]["denominator_weighted_role_fve_dir_equals_global_fve_dir"] = abs(denominator_weighted_dir - dir_fve) < 1e-10
     _check_or_raise(report)
-    write_json(out_path(cfg, "role_fve_raw_denominator_breakdown.json"), breakdown_payload)
-    write_json(out_path(cfg, "metric_audit.json"), report)
+    _write_json_if_changed(out_path(cfg, "role_fve_raw_denominator_breakdown.json"), breakdown_payload)
+    _write_json_if_changed(out_path(cfg, "metric_audit.json"), report)
     print(json.dumps(report, indent=2, sort_keys=True))
 
 
