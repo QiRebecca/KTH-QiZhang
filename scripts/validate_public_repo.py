@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -66,8 +67,20 @@ def _raw_url(repo_url: str, branch: str, rel: str) -> str:
 
 def _download(url: str) -> bytes:
     req = urllib.request.Request(url, headers={"User-Agent": "nla-codescope-public-validator"})
-    with urllib.request.urlopen(req, timeout=30) as response:
-        return response.read()
+    try:
+        with urllib.request.urlopen(req, timeout=30) as response:
+            return response.read()
+    except urllib.error.URLError:
+        if shutil.which("curl") is None:
+            raise
+        result = subprocess.run(
+            ["curl", "--fail", "--location", "--silent", "--show-error", "--max-time", "30", url],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        if result.returncode != 0:
+            raise urllib.error.URLError(result.stderr.decode("utf-8", errors="replace").strip())
+        return result.stdout
 
 
 def _validate_text_kind(rel: str, text: str, tmp_dir: Path, errors: list[str], origin: str) -> None:
@@ -130,6 +143,25 @@ def _clone_checks(clone: Path, errors: list[str]) -> str:
     return commit
 
 
+def _clone_public_repo(repo_url: str, branch: str, clone: Path) -> tuple[bool, str]:
+    last_output = ""
+    for attempt in range(1, 4):
+        if clone.exists():
+            shutil.rmtree(clone)
+        result = subprocess.run(
+            ["git", "clone", "--depth", "1", "--branch", branch, repo_url, str(clone)],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+        )
+        last_output = result.stdout
+        if result.returncode == 0:
+            return True, last_output
+        if attempt < 3:
+            time.sleep(5 * attempt)
+    return False, last_output
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--repo-url", default="https://github.com/QiRebecca/KTH-QiZhang")
@@ -140,9 +172,9 @@ def main() -> None:
     with tempfile.TemporaryDirectory(prefix="nla-public-validate-") as tmp:
         tmp_path = Path(tmp)
         clone = tmp_path / "repo"
-        result = subprocess.run(["git", "clone", "--depth", "1", "--branch", args.branch, args.repo_url, str(clone)], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-        if result.returncode != 0:
-            print(result.stdout, file=sys.stderr)
+        cloned, clone_output = _clone_public_repo(args.repo_url, args.branch, clone)
+        if not cloned:
+            print(clone_output, file=sys.stderr)
             raise SystemExit("public repo validation failed: could not clone repository")
 
         commit = _clone_checks(clone, errors)
