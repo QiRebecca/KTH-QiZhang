@@ -171,6 +171,28 @@ def _clone_public_repo(repo_url: str, branch: str, clone: Path) -> tuple[bool, s
     return False, last_output
 
 
+def _run_local_checks_for_not_verified() -> int:
+    root = Path.cwd()
+    checks = [
+        [sys.executable, "scripts/validate_repository_format.py"],
+        [sys.executable, "scripts/verify_submission_consistency.py"],
+        [sys.executable, "scripts/check_submission_ready.py", "--skip-pytest"],
+    ]
+    missing = [cmd[1] for cmd in checks if not (root / cmd[1]).exists()]
+    if missing:
+        print("local fallback checks NOT RUN because scripts are missing:", file=sys.stderr)
+        for item in missing:
+            print(f"- {item}", file=sys.stderr)
+        return 1
+    status = 0
+    print("running local fallback checks after public validation could not be verified", file=sys.stderr)
+    for cmd in checks:
+        result = subprocess.run(cmd, cwd=root)
+        if result.returncode != 0:
+            status = result.returncode
+    return status
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--repo-url", default="https://github.com/QiRebecca/KTH-QiZhang")
@@ -184,7 +206,10 @@ def main() -> None:
         cloned, clone_output = _clone_public_repo(args.repo_url, args.branch, clone)
         if not cloned:
             print(clone_output, file=sys.stderr)
-            raise SystemExit("public repo validation failed: could not clone repository")
+            local_status = _run_local_checks_for_not_verified()
+            if local_status != 0:
+                raise SystemExit("public repo validation NOT VERIFIED: public clone failed and local fallback checks failed")
+            raise SystemExit("public repo validation NOT VERIFIED: could not clone public repository")
 
         commit = _clone_checks(clone, errors)
         raw_tmp = tmp_path / "raw"
