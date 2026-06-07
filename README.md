@@ -12,12 +12,31 @@ This is a controlled small-model stress test of the NLA idea, not an Anthropic-s
 
 The target model is frozen. I extract a residual-stream hidden state $h$, inject it into the AV prompt at `<ACT>`, generate text, and reconstruct $\hat{h}$ from that text with AR:
 
-```text
-Python function -> frozen Qwen2.5-Coder -> layer-18 residual h
-h -> AV <ACT> embedding injection -> natural-language text
-text -> AR truncated Qwen + Linear(d,d) -> reconstructed h-hat
-h compared with h-hat -> raw FVE / directional FVE / cosine / normalized MSE
+```mermaid
+flowchart LR
+    A["Python function"] --> B["Frozen Qwen2.5-Coder<br/>layer 18"]
+    B --> C["Residual activation<br/>h"]
+    C --> D["AV<br/>inject h at &lt;ACT&gt;"]
+    D --> E["Natural-language<br/>explanation"]
+    E --> F["AR<br/>truncated Qwen + Linear(d,d)"]
+    F --> G["Reconstructed activation<br/>h-hat"]
+    C --> M["Compare"]
+    G --> M
+    M --> N["raw FVE<br/>directional FVE<br/>cosine<br/>normalized MSE"]
+
+    classDef data fill:#f8fafc,stroke:#64748b,color:#0f172a;
+    classDef model fill:#eff6ff,stroke:#2563eb,color:#172554;
+    classDef vector fill:#fff7ed,stroke:#ea580c,color:#7c2d12;
+    classDef text fill:#ecfdf5,stroke:#059669,color:#064e3b;
+    classDef metric fill:#f5f3ff,stroke:#7c3aed,color:#3b0764;
+    class A data;
+    class B,D,F model;
+    class C,G vector;
+    class E text;
+    class M,N metric;
 ```
+
+In the diagram, "Residual activation h" is the extracted vector $h$, and "Reconstructed activation h-hat" is the AR prediction $\hat{h}$.
 
 Layer convention is fixed in [`artifacts/nla_meta_main.yaml`](artifacts/nla_meta_main.yaml): `target_layer_label = 18` for reporting, `target_block_index_zero_based = 17`, and HuggingFace extraction uses `hidden_states[18]` because `hidden_states[0]` is the embedding output. The model width is $d_{\mathrm{model}} = 1536$.
 
