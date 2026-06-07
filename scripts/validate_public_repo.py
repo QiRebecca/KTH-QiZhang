@@ -148,15 +148,19 @@ def _clone_public_repo(repo_url: str, branch: str, clone: Path) -> tuple[bool, s
     for attempt in range(1, 4):
         if clone.exists():
             shutil.rmtree(clone)
-        result = subprocess.run(
-            ["git", "clone", "--depth", "1", "--branch", branch, repo_url, str(clone)],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-        )
-        last_output = result.stdout
-        if result.returncode == 0:
-            return True, last_output
+        try:
+            result = subprocess.run(
+                ["git", "clone", "--depth", "1", "--branch", branch, repo_url, str(clone)],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                timeout=180,
+            )
+            last_output = result.stdout
+            if result.returncode == 0:
+                return True, last_output
+        except subprocess.TimeoutExpired as exc:
+            last_output = (exc.stdout or "") + f"\nclone attempt {attempt} timed out after 180 seconds"
         if attempt < 3:
             time.sleep(5 * attempt)
     return False, last_output
