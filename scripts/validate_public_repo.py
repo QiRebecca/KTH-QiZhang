@@ -154,7 +154,7 @@ def _clone_public_repo(repo_url: str, branch: str, clone: Path) -> tuple[bool, s
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,
-                timeout=180,
+                timeout=300,
             )
             last_output = result.stdout
             if result.returncode == 0:
@@ -165,7 +165,7 @@ def _clone_public_repo(repo_url: str, branch: str, clone: Path) -> tuple[bool, s
                 stdout_text = stdout.decode("utf-8", errors="replace")
             else:
                 stdout_text = stdout
-            last_output = stdout_text + f"\nclone attempt {attempt} timed out after 180 seconds"
+            last_output = stdout_text + f"\nclone attempt {attempt} timed out after 300 seconds"
         if attempt < 3:
             time.sleep(5 * attempt)
     return False, last_output
